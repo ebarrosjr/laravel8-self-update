@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Requests\GravaPost;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -22,17 +23,27 @@ class PostController extends Controller
 
     public function store(GravaPost $request)
     {
-        /*
-        Post::create([
-            'title' => $request->title,
-            'body' => $request->body
-        ]);
-        */
+        $data = $request->all();
+        if($request->image) {
+            if ($request->image->isValid()) {
+                $fileName = uniqid() . '.' . $request->image->getClientOriginalExtension();
+                $file = $request->image->storeAs('posts', $fileName);
+                $data['image'] = $file;
+            } else {
+                unset($data['image']);
+            }
+        }
+
         if(isset($request->id)) {
             $post = Post::find($request->id);
-            $post->update($request->all());
+            if(isset($data['image'])) {
+                if(Storage::exists($post->image)) {
+                    Storage::delete($post->image);
+                }
+            }
+            $post->update($data);
         } else {
-            Post::create($request->all());
+            Post::create($data);
         }
 
         return redirect()->route('posts.index')->with('message', 'Registro atualizado com sucesso');
@@ -66,6 +77,10 @@ class PostController extends Controller
             // return redirect()->route('e404');
             return redirect()->route('posts.index');
         }        
+        if(Storage::exists($post->image)) {
+            Storage::delete($post->image);
+        }
+
         $post->delete();
 
         return redirect()->route('posts.index')->with('message', 'post deletado com sucesso!');

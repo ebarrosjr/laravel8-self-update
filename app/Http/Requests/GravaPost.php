@@ -24,8 +24,9 @@ class GravaPost extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|min:3|max:150',
-            'body' => 'required|min:5'
+            'title' => 'required|min:3|max:150|unique:posts',
+            'body' => ['required', 'min:5'],
+            'image' => 'nullable|image'
         ];
     }
 }

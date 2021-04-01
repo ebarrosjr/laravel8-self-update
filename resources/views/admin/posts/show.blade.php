@@ -5,5 +5,8 @@
     <hr />
     <h1>{{ $post->title }}</h1>
     <p><small>{{ $post->created_at }}</small></p>
+    <hr />
+    <img src="{{ url("storage/{$post->image}") }}" alt="arquivo">
+    <hr />
     <p>{{ $post->body }}</p>
 @endsection
